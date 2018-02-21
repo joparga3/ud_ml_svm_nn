@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Jose Parreno Garcia" />
+
+
+<title>SVM and Neural Network</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">SVM and NN</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">SVM and NN</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">SVM and Neural Network</h1>
+<h4 class="author"><em>Jose Parreno Garcia</em></h4>
+<h4 class="date"><em>February 2018</em></h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#svm"><span class="toc-section-number">1</span> SVM</a><ul>
+<li><a href="#preparing-the-data"><span class="toc-section-number">1.1</span> Preparing the data</a></li>
+<li><a href="#implementing-simple-svm"><span class="toc-section-number">1.2</span> Implementing simple SVM</a></li>
+<li><a href="#choosing-the-cost-of-an-svm"><span class="toc-section-number">1.3</span> Choosing the Cost of an SVM</a></li>
+<li><a href="#visualizing-an-svm"><span class="toc-section-number">1.4</span> Visualizing an SVM</a></li>
+<li><a href="#predicting-labels-based-on-a-model-trained-by-an-svm"><span class="toc-section-number">1.5</span> Predicting labels based on a model trained by an SVM</a></li>
+<li><a href="#tuning-an-svm"><span class="toc-section-number">1.6</span> Tuning an SVM</a></li>
+</ul></li>
+<li><a href="#neural-network"><span class="toc-section-number">2</span> Neural Network</a><ul>
+<li><a href="#visualizing-a-neural-network-trained-by-neuralnet"><span class="toc-section-number">2.1</span> Visualizing a Neural Network trained by neuralnet</a></li>
+<li><a href="#predicting-labels-based-on-a-model-trained-by-neuralnet"><span class="toc-section-number">2.2</span> Predicting labels based on a model trained by neuralnet</a></li>
+<li><a href="#training-a-nn-with-nnet"><span class="toc-section-number">2.3</span> Training a NN with nnet</a></li>
+<li><a href="#predicting-labels-based-on-a-model-trained-by-nnet"><span class="toc-section-number">2.4</span> Predicting labels based on a model trained by nnet</a></li>
+</ul></li>
+</ul>
+</div>
+
+<style>
+body {
+text-align: justify}
+
+</style>
+<p><br></p>
+<pre class="r"><code>library(knitr)</code></pre>
+<p><br></p>
+<p>We will look at:</p>
+<ul>
+<li>SVM - Support Vector Machine</li>
+<li>Neural Network</li>
+</ul>
+<p><br></p>
+<div id="svm" class="section level1">
+<h1><span class="header-section-number">1</span> SVM</h1>
+<p><img src="images/1.PNG" width="729" /></p>
+<div id="preparing-the-data" class="section level2">
+<h2><span class="header-section-number">1.1</span> Preparing the data</h2>
+<pre class="r"><code>library(C50)
+
+data(churn)
+
+str(churnTrain)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    3333 obs. of  20 variables:
+##  $ state                        : Factor w/ 51 levels &quot;AK&quot;,&quot;AL&quot;,&quot;AR&quot;,..: 17 36 32 36 37 2 20 25 19 50 ...
+##  $ account_length               : int  128 107 137 84 75 118 121 147 117 141 ...
+##  $ area_code                    : Factor w/ 3 levels &quot;area_code_408&quot;,..: 2 2 2 1 2 3 3 2 1 2 ...
+##  $ international_plan           : Factor w/ 2 levels &quot;no&quot;,&quot;yes&quot;: 1 1 1 2 2 2 1 2 1 2 ...
+##  $ voice_mail_plan              : Factor w/ 2 levels &quot;no&quot;,&quot;yes&quot;: 2 2 1 1 1 1 2 1 1 2 ...
+##  $ number_vmail_messages        : int  25 26 0 0 0 0 24 0 0 37 ...
+##  $ total_day_minutes            : num  265 162 243 299 167 ...
+##  $ total_day_calls              : int  110 123 114 71 113 98 88 79 97 84 ...
+##  $ total_day_charge             : num  45.1 27.5 41.4 50.9 28.3 ...
+##  $ total_eve_minutes            : num  197.4 195.5 121.2 61.9 148.3 ...
+##  $ total_eve_calls              : int  99 103 110 88 122 101 108 94 80 111 ...
+##  $ total_eve_charge             : num  16.78 16.62 10.3 5.26 12.61 ...
+##  $ total_night_minutes          : num  245 254 163 197 187 ...
+##  $ total_night_calls            : int  91 103 104 89 121 118 118 96 90 97 ...
+##  $ total_night_charge           : num  11.01 11.45 7.32 8.86 8.41 ...
+##  $ total_intl_minutes           : num  10 13.7 12.2 6.6 10.1 6.3 7.5 7.1 8.7 11.2 ...
+##  $ total_intl_calls             : int  3 3 5 7 3 6 7 6 4 5 ...
+##  $ total_intl_charge            : num  2.7 3.7 3.29 1.78 2.73 1.7 2.03 1.92 2.35 3.02 ...
+##  $ number_customer_service_calls: int  1 1 0 2 3 0 3 0 1 0 ...
+##  $ churn                        : Factor w/ 2 levels &quot;yes&quot;,&quot;no&quot;: 2 2 2 2 2 2 2 2 2 2 ...</code></pre>
+<pre class="r"><code># Remove certain variables that we are not going to use
+churnTrain = churnTrain[,! names(churnTrain) %in% c(&quot;state&quot;
+                                                    , &quot;area_code&quot;
+                                                    , &quot;account_length&quot;) ]
+
+set.seed(2)
+ind = sample(2, nrow(churnTrain), replace = TRUE, prob=c(0.7,0.3))
+trainset = churnTrain[ind == 1,]
+testset = churnTrain[ind == 2,]
+
+dim(trainset)</code></pre>
+<pre><code>## [1] 2315   17</code></pre>
+<pre class="r"><code>dim(testset)</code></pre>
+<pre><code>## [1] 1018   17</code></pre>
+<pre class="r"><code>split.data = function(data, p = 0.7, s = 666){
+   set.seed(s)
+   index = sample(1:dim(data)[1])
+   train = data[index[1:floor(dim(data)[1] * p)], ]
+   test = data[index[((ceiling(dim(data)[1] * p)) + 1):dim(data)[1]], ]
+   return(list(train = train, test = test))
+   }</code></pre>
+</div>
+<div id="implementing-simple-svm" class="section level2">
+<h2><span class="header-section-number">1.2</span> Implementing simple SVM</h2>
+<p><img src="images/2.PNG" width="699" /><img src="images/3.PNG" width="718" /></p>
+<pre class="r"><code>library(e1071)
+
+model = svm(churn~., data = trainset, kernel=&quot;radial&quot;, cost=1,
+            gamma = 1/ncol(trainset))
+
+summary(model)</code></pre>
+<pre><code>## 
+## Call:
+## svm(formula = churn ~ ., data = trainset, kernel = &quot;radial&quot;, cost = 1, gamma = 1/ncol(trainset))
+## 
+## 
+## Parameters:
+##    SVM-Type:  C-classification 
+##  SVM-Kernel:  radial 
+##        cost:  1 
+##       gamma:  0.05882352941 
+## 
+## Number of Support Vectors:  691
+## 
+##  ( 394 297 )
+## 
+## 
+## Number of Classes:  2 
+## 
+## Levels: 
+##  yes no</code></pre>
+</div>
+<div id="choosing-the-cost-of-an-svm" class="section level2">
+<h2><span class="header-section-number">1.3</span> Choosing the Cost of an SVM</h2>
+<pre class="r"><code>iris.subset = subset(iris, select=c(&quot;Sepal.Length&quot;, &quot;Sepal.Width&quot;, &quot;Species&quot;),
+                     Species %in% c(&quot;setosa&quot;,&quot;virginica&quot;))
+
+# FIRST MODEL
+plot(x=iris.subset$Sepal.Length,y=iris.subset$Sepal.Width,
+                col=iris.subset$Species, pch=19)
+
+svm.model = svm(Species ~ ., data=iris.subset, kernel=&#39;linear&#39;,
+                cost=1, scale=FALSE)
+
+points(iris.subset[svm.model$index,c(1,2)],col=&quot;blue&quot;,cex=2)
+
+w = t(svm.model$coefs) %*% svm.model$SV
+b = -svm.model$rho
+abline(a=-b/w[1,2], b=-w[1,1]/w[1,2], col=&quot;red&quot;, lty=5)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-37-1.png" /><!-- --></p>
+<pre class="r"><code># SECOND MODEL
+plot(x=iris.subset$Sepal.Length,y=iris.subset$Sepal.Width,
+                col=iris.subset$Species, pch=19)
+
+svm.model = svm(Species ~ ., data=iris.subset, type=&#39;C-classification&#39;,
+                kernel=&#39;linear&#39;, cost=10000, scale=FALSE)
+points(iris.subset[svm.model$index,c(1,2)],col=&quot;blue&quot;,cex=2)
+w = t(svm.model$coefs) %*% svm.model$SV
+b = -svm.model$rho
+abline(a=-b/w[1,2], b=-w[1,1]/w[1,2], col=&quot;red&quot;, lty=5)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-37-2.png" /><!-- --></p>
+</div>
+<div id="visualizing-an-svm" class="section level2">
+<h2><span class="header-section-number">1.4</span> Visualizing an SVM</h2>
+<p><img src="images/4.PNG" width="737" /></p>
+<pre class="r"><code>data(iris)
+
+model.iris = svm(Species~., iris)
+
+plot(model.iris, iris, Petal.Width ~ Petal.Length, slice =
+                list(Sepal.Width = 3, Sepal.Length = 4))</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-39-1.png" /><!-- --></p>
+<pre class="r"><code>plot(model, trainset, total_day_minutes ~ total_intl_charge)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-39-2.png" /><!-- --></p>
+</div>
+<div id="predicting-labels-based-on-a-model-trained-by-an-svm" class="section level2">
+<h2><span class="header-section-number">1.5</span> Predicting labels based on a model trained by an SVM</h2>
+<pre class="r"><code>svm.pred = predict(model, testset[, !names(testset) %in% c(&quot;churn&quot;)])
+
+svm.table=table(svm.pred, testset$churn)
+svm.table</code></pre>
+<pre><code>##         
+## svm.pred yes  no
+##      yes  70  12
+##      no   71 865</code></pre>
+<pre class="r"><code>classAgreement(svm.table)</code></pre>
+<pre><code>## $diag
+## [1] 0.9184675835
+## 
+## $kappa
+## [1] 0.5855902693
+## 
+## $rand
+## [1] 0.8500829706
+## 
+## $crand
+## [1] 0.5260472453</code></pre>
+<pre class="r"><code>library(caret)
+confusionMatrix(svm.table)</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##         
+## svm.pred yes  no
+##      yes  70  12
+##      no   71 865
+##                                                 
+##                Accuracy : 0.9184676             
+##                  95% CI : (0.8999294, 0.9345392)
+##     No Information Rate : 0.8614931             
+##     P-Value [Acc &gt; NIR] : 0.0000000125077120    
+##                                                 
+##                   Kappa : 0.5855903             
+##  Mcnemar&#39;s Test P-Value : 0.0000000001936083    
+##                                                 
+##             Sensitivity : 0.49645390            
+##             Specificity : 0.98631699            
+##          Pos Pred Value : 0.85365854            
+##          Neg Pred Value : 0.92414530            
+##              Prevalence : 0.13850688            
+##          Detection Rate : 0.06876228            
+##    Detection Prevalence : 0.08055010            
+##       Balanced Accuracy : 0.74138545            
+##                                                 
+##        &#39;Positive&#39; Class : yes                   
+## </code></pre>
+<pre class="r"><code>library(car)
+data(Quartet)
+model.regression = svm(Quartet$y1~Quartet$x,type=&quot;eps-regression&quot;)
+
+predict.y = predict(model.regression, Quartet$x)
+predict.y</code></pre>
+<pre><code>##           1           2           3           4           5           6           7           8           9          10          11 
+## 8.196894242 7.152946353 8.807471490 7.713098715 8.533577689 8.774046035 6.186349064 5.763688864 8.726924725 6.621373417 5.882946381</code></pre>
+<pre class="r"><code>plot(Quartet$x, Quartet$y1, pch=19)
+points(Quartet$x, predict.y, pch=15, col=&quot;red&quot;)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-40-1.png" /><!-- --></p>
+</div>
+<div id="tuning-an-svm" class="section level2">
+<h2><span class="header-section-number">1.6</span> Tuning an SVM</h2>
+<pre class="r"><code>tuned = tune.svm(churn~., data = trainset, gamma = 10^(-6:-1),cost = 10^(1:2))
+summary(tuned)</code></pre>
+<pre><code>## 
+## Parameter tuning of &#39;svm&#39;:
+## 
+## - sampling method: 10-fold cross validation 
+## 
+## - best parameters:
+##  gamma cost
+##   0.01  100
+## 
+## - best performance: 0.08080310494 
+## 
+## - Detailed performance results:
+##       gamma cost         error    dispersion
+## 1  0.000001   10 0.14774779818 0.02237866720
+## 2  0.000010   10 0.14774779818 0.02237866720
+## 3  0.000100   10 0.14774779818 0.02237866720
+## 4  0.001000   10 0.14774779818 0.02237866720
+## 5  0.010000   10 0.09202492909 0.01981595086
+## 6  0.100000   10 0.08900582176 0.02392487351
+## 7  0.000001  100 0.14774779818 0.02237866720
+## 8  0.000010  100 0.14774779818 0.02237866720
+## 9  0.000100  100 0.14774779818 0.02237866720
+## 10 0.001000  100 0.11621697268 0.02317552818
+## 11 0.010000  100 0.08080310494 0.02367425659
+## 12 0.100000  100 0.13048775937 0.02155658628</code></pre>
+<pre class="r"><code>model.tuned = svm(churn~., data = trainset, gamma = tuned$best.parameters$gamma, 
+                  cost = tuned$best.parameters$cost)
+summary(model.tuned)</code></pre>
+<pre><code>## 
+## Call:
+## svm(formula = churn ~ ., data = trainset, gamma = tuned$best.parameters$gamma, cost = tuned$best.parameters$cost)
+## 
+## 
+## Parameters:
+##    SVM-Type:  C-classification 
+##  SVM-Kernel:  radial 
+##        cost:  100 
+##       gamma:  0.01 
+## 
+## Number of Support Vectors:  547
+## 
+##  ( 304 243 )
+## 
+## 
+## Number of Classes:  2 
+## 
+## Levels: 
+##  yes no</code></pre>
+<pre class="r"><code>svm.tuned.pred = predict(model.tuned, testset[, !names(testset) %in% c(&quot;churn&quot;)])
+
+svm.tuned.table=table(svm.tuned.pred, testset$churn)
+svm.tuned.table</code></pre>
+<pre><code>##               
+## svm.tuned.pred yes  no
+##            yes  95  24
+##            no   46 853</code></pre>
+<pre class="r"><code>classAgreement(svm.tuned.table)</code></pre>
+<pre><code>## $diag
+## [1] 0.931237721
+## 
+## $kappa
+## [1] 0.6916779882
+## 
+## $rand
+## [1] 0.8718060168
+## 
+## $crand
+## [1] 0.6303614637</code></pre>
+<pre class="r"><code>confusionMatrix(svm.tuned.table)</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##               
+## svm.tuned.pred yes  no
+##            yes  95  24
+##            no   46 853
+##                                                 
+##                Accuracy : 0.9312377             
+##                  95% CI : (0.9139185, 0.9460076)
+##     No Information Rate : 0.8614931             
+##     P-Value [Acc &gt; NIR] : 0.000000000001560231  
+##                                                 
+##                   Kappa : 0.691678              
+##  Mcnemar&#39;s Test P-Value : 0.0120738             
+##                                                 
+##             Sensitivity : 0.67375887            
+##             Specificity : 0.97263398            
+##          Pos Pred Value : 0.79831933            
+##          Neg Pred Value : 0.94883204            
+##              Prevalence : 0.13850688            
+##          Detection Rate : 0.09332024            
+##    Detection Prevalence : 0.11689587            
+##       Balanced Accuracy : 0.82319642            
+##                                                 
+##        &#39;Positive&#39; Class : yes                   
+## </code></pre>
+<p><br></p>
+</div>
+</div>
+<div id="neural-network" class="section level1">
+<h1><span class="header-section-number">2</span> Neural Network</h1>
+<p><img src="images/5.PNG" width="738" /></p>
+<pre class="r"><code>data(iris)
+ind = sample(2, nrow(iris), replace = TRUE, prob=c(0.7, 0.3))
+trainset = iris[ind == 1,]
+testset = iris[ind == 2,]
+
+library(neuralnet)
+
+trainset$setosa = trainset$Species == &quot;setosa&quot;
+trainset$virginica = trainset$Species == &quot;virginica&quot;
+trainset$versicolor = trainset$Species == &quot;versicolor&quot;
+
+network = neuralnet(versicolor + virginica + setosa~ Sepal.Length + 
+                      Sepal.Width + Petal.Length + Petal.Width, trainset,hidden=3)
+
+head(network$result.matrix)</code></pre>
+<pre><code>##                                          1
+## error                       1.703821468022
+## reached.threshold           0.008940656121
+## steps                    7327.000000000000
+## Intercept.to.1layhid1     -13.422827460355
+## Sepal.Length.to.1layhid1   -1.961731000959
+## Sepal.Width.to.1layhid1    -2.431731244103</code></pre>
+<pre class="r"><code>head(network$generalized.weights[[1]])</code></pre>
+<pre><code>##             [,1]          [,2]          [,3]          [,4]          [,5]          [,6]           [,7]            [,8]          [,9]        [,10]         [,11]         [,12]
+## 2   -2.821111487  -4.380038135   6.410699002  11.048242635  -3.302207559  -5.126984561    7.503942612    12.932346172  1.8944961142  2.941381498  -4.305056502  -7.419363823
+## 5    1.374146396   2.133490145  -3.122612833  -5.381532321   1.256408803   1.950691575   -2.855065705    -4.920439770 -2.0415633066 -3.169716992   4.639252264   7.995319069
+## 6   17.430826397  27.062980067 -39.609842399 -68.263873746   8.531034127  13.245224367  -19.385937852   -33.409858103  7.1648162269 11.124043858 -16.281341751 -28.059375715
+## 8    8.298624090  12.884386144 -18.857808852 -32.499676935   5.513756398   8.560619901  -12.529470317   -21.593374959 12.4721909335 19.364236922 -28.341829928 -48.844503508
+## 9   -1.132970777  -1.759042619   2.574564905   4.437022929  -1.180215982  -1.832395198    2.681924996     4.622048052  0.9720124761  1.509139822  -2.208802963  -3.806666155
+## 10 -18.061541906 -28.042224627  41.043081496  70.733927919 395.681162748 614.331827492 -899.146611828 -1549.595432686  4.0699225120  6.318933396  -9.248499504 -15.938927296</code></pre>
+<div id="visualizing-a-neural-network-trained-by-neuralnet" class="section level2">
+<h2><span class="header-section-number">2.1</span> Visualizing a Neural Network trained by neuralnet</h2>
+<pre class="r"><code>plot(network)
+
+par(mfrow=c(2,2))
+gwplot(network,selected.covariate=&quot;Petal.Width&quot;)
+gwplot(network,selected.covariate=&quot;Sepal.Width&quot;)
+gwplot(network,selected.covariate=&quot;Petal.Length&quot;)
+gwplot(network,selected.covariate=&quot;Petal.Width&quot;)</code></pre>
+</div>
+<div id="predicting-labels-based-on-a-model-trained-by-neuralnet" class="section level2">
+<h2><span class="header-section-number">2.2</span> Predicting labels based on a model trained by neuralnet</h2>
+<pre class="r"><code>net.predict = compute(network, testset[-5])$net.result
+
+net.prediction = c(&quot;versicolor&quot;, &quot;virginica&quot;, &quot;setosa&quot;)[apply(net.predict, 1, which.max)]
+
+predict.table = table(testset$Species, net.prediction)
+
+predict.table</code></pre>
+<pre><code>##             net.prediction
+##              setosa versicolor virginica
+##   setosa         15          0         0
+##   versicolor      0         14         0
+##   virginica       0          0        12</code></pre>
+<pre class="r"><code>classAgreement(predict.table)</code></pre>
+<pre><code>## $diag
+## [1] 1
+## 
+## $kappa
+## [1] 1
+## 
+## $rand
+## [1] 1
+## 
+## $crand
+## [1] 1</code></pre>
+<pre class="r"><code>library(caret)
+confusionMatrix(predict.table)</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##             net.prediction
+##              setosa versicolor virginica
+##   setosa         15          0         0
+##   versicolor      0         14         0
+##   virginica       0          0        12
+## 
+## Overall Statistics
+##                                                   
+##                Accuracy : 1                       
+##                  95% CI : (0.9139562, 1)          
+##     No Information Rate : 0.3658537               
+##     P-Value [Acc &gt; NIR] : &lt; 0.00000000000000022204
+##                                                   
+##                   Kappa : 1                       
+##  Mcnemar&#39;s Test P-Value : NA                      
+## 
+## Statistics by Class:
+## 
+##                      Class: setosa Class: versicolor Class: virginica
+## Sensitivity              1.0000000         1.0000000        1.0000000
+## Specificity              1.0000000         1.0000000        1.0000000
+## Pos Pred Value           1.0000000         1.0000000        1.0000000
+## Neg Pred Value           1.0000000         1.0000000        1.0000000
+## Prevalence               0.3658537         0.3414634        0.2926829
+## Detection Rate           0.3658537         0.3414634        0.2926829
+## Detection Prevalence     0.3658537         0.3414634        0.2926829
+## Balanced Accuracy        1.0000000         1.0000000        1.0000000</code></pre>
+</div>
+<div id="training-a-nn-with-nnet" class="section level2">
+<h2><span class="header-section-number">2.3</span> Training a NN with nnet</h2>
+<pre class="r"><code>library(nnet)
+
+data(iris)
+set.seed(2)
+ind = sample(2, nrow(iris), replace = TRUE, prob=c(0.7, 0.3))
+trainset = iris[ind == 1,]
+testset = iris[ind == 2,]
+
+iris.nn = nnet(Species ~ ., data = trainset, size = 2, rang =0.1,
+               decay = 5e-4, maxit = 200)</code></pre>
+<pre><code>## # weights:  19
+## initial  value 114.539765 
+## iter  10 value 52.100312
+## iter  20 value 50.231442
+## iter  30 value 49.526599
+## iter  40 value 49.402229
+## iter  50 value 44.680338
+## iter  60 value 5.254389
+## iter  70 value 2.836695
+## iter  80 value 2.744315
+## iter  90 value 2.687069
+## iter 100 value 2.621556
+## iter 110 value 2.589096
+## iter 120 value 2.410539
+## iter 130 value 2.096461
+## iter 140 value 1.938717
+## iter 150 value 1.857105
+## iter 160 value 1.825393
+## iter 170 value 1.817409
+## iter 180 value 1.815591
+## iter 190 value 1.815030
+## iter 200 value 1.814746
+## final  value 1.814746 
+## stopped after 200 iterations</code></pre>
+<pre class="r"><code>summary(iris.nn)</code></pre>
+<pre><code>## a 4-2-3 network with 19 weights
+## options were - softmax modelling  decay=0.0005
+##  b-&gt;h1 i1-&gt;h1 i2-&gt;h1 i3-&gt;h1 i4-&gt;h1 
+## -20.60   0.31  -3.84   3.36   7.72 
+##  b-&gt;h2 i1-&gt;h2 i2-&gt;h2 i3-&gt;h2 i4-&gt;h2 
+##  -7.15   1.50   2.49  -4.14   5.59 
+##  b-&gt;o1 h1-&gt;o1 h2-&gt;o1 
+##  -7.28  -3.67  13.16 
+##  b-&gt;o2 h1-&gt;o2 h2-&gt;o2 
+##  15.90 -16.64 -19.40 
+##  b-&gt;o3 h1-&gt;o3 h2-&gt;o3 
+##  -8.62  20.31   6.24</code></pre>
+</div>
+<div id="predicting-labels-based-on-a-model-trained-by-nnet" class="section level2">
+<h2><span class="header-section-number">2.4</span> Predicting labels based on a model trained by nnet</h2>
+<pre class="r"><code>iris.predict = predict(iris.nn, testset, type=&quot;class&quot;)
+
+nn.table = table(testset$Species, iris.predict)
+
+library(caret)
+confusionMatrix(nn.table)</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##             iris.predict
+##              setosa versicolor virginica
+##   setosa         17          0         0
+##   versicolor      0         13         1
+##   virginica       0          2        13
+## 
+## Overall Statistics
+##                                                  
+##                Accuracy : 0.9347826              
+##                  95% CI : (0.8210356, 0.9863432) 
+##     No Information Rate : 0.3695652              
+##     P-Value [Acc &gt; NIR] : 0.000000000000001019459
+##                                                  
+##                   Kappa : 0.901919               
+##  Mcnemar&#39;s Test P-Value : NA                     
+## 
+## Statistics by Class:
+## 
+##                      Class: setosa Class: versicolor Class: virginica
+## Sensitivity              1.0000000         0.8666667        0.9285714
+## Specificity              1.0000000         0.9677419        0.9375000
+## Pos Pred Value           1.0000000         0.9285714        0.8666667
+## Neg Pred Value           1.0000000         0.9375000        0.9677419
+## Prevalence               0.3695652         0.3260870        0.3043478
+## Detection Rate           0.3695652         0.2826087        0.2826087
+## Detection Prevalence     0.3695652         0.3043478        0.3260870
+## Balanced Accuracy        1.0000000         0.9172043        0.9330357</code></pre>
+<pre class="r"><code>head(predict(iris.nn, testset))</code></pre>
+<pre><code>##          setosa       versicolor       virginica
+## 2  0.9992451322 0.00039665629301 0.0003582115358
+## 5  0.9996104389 0.00011442731015 0.0002751337514
+## 6  0.9996456163 0.00009181674634 0.0002625669725
+## 8  0.9995166939 0.00018028962014 0.0003030164913
+## 13 0.9978103303 0.00170207135838 0.0004875983747
+## 16 0.9996578193 0.00008432042675 0.0002578602592</code></pre>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
